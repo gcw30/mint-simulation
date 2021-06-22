@@ -213,14 +213,31 @@ def analysis(G):
         spl = nx.average_shortest_path_length(G)
         diam = nx.diameter(G)
     else:
-        spl = nx.average_shortest_path_length(G.subgraph(c[0]))             # finds average shortest path length of largest connected component
+        spl = nx.average_shortest_path_length(G.subgraph(c[0]))
         diam = nx.diameter(G.subgraph(c[0]))
 
     density = nx.density(G)
 
     planar = nx.check_planarity(G)[0]
 
-    return obv_count, rev_count, edge_count, o_deg_min, o_deg_mean, o_deg_max, r_deg_min, r_deg_mean, r_deg_max, o_av_cluster, r_av_cluster, connect, min_comp, max_comp, spl, diam, density, planar
+    return obv_count, \
+    rev_count, \
+    edge_count, \
+    o_deg_min, \
+    o_deg_mean, \
+    o_deg_max, \
+    r_deg_min, \
+    r_deg_mean, \
+    r_deg_max, \
+    o_av_cluster, \
+    r_av_cluster, \
+    connect, \
+    min_comp, \
+    max_comp, \
+    spl, \
+    diam, \
+    density, \
+    planar
 
 # Set up output Excel file
 wb = xl.Workbook()
