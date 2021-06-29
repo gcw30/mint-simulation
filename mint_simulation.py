@@ -1,31 +1,61 @@
 #! /usr/bin/env python3
 
-print('Starting program')
-
-import networkx as nx, numpy as np, random, openpyxl as xl
+import networkx as nx, numpy as np, random, openpyxl as xl, argparse
 from networkx.algorithms import bipartite
 from collections import namedtuple
+from pathlib import Path
 
 random.seed(0)
 np.random.seed(0)
 analysis_tuple = namedtuple('analysis_tuple', 'obv_count rev_count edge_count o_deg_min o_deg_mean o_deg_max r_deg_min r_deg_mean r_deg_max o_av_cluster r_av_cluster connect min_comp max_comp spl diam density planar')
 
-### VARIABLES ###
-k = 1                    # Shape of gamma distribution (k=1 suggested by Esty 2011)
-theta = 450              # Die life in minutes (25hrs suggested by Carter 1983)
-a = 1.5                  # How much longer obverses are to last than reverses
-t = 600                  # Work period length in minutes
-D = 20                   # How many obverse dies to generate in graph
-W = 1                    # Number of workstations
-odb = 1                  # Number of obverses in die box
-rdb = 1                  # Number of reverses in die box
-o_loss = 0               # Percentage of obverse dies to delete from full chart
-r_loss = 0               # Percentage of reverse dies to delete from full chart
-e_loss = 0               # Percentage of edges to delete from full chart
-i = 10000                # Iterations
+parser = argparse.ArgumentParser()
+parser.add_argument('W', type=int, help='number of workstations')
+parser.add_argument('odb', type=int, help='number of dies in obverse die box')
+parser.add_argument('rdb', type=int, help='number of dies in reverse die box')
+parser.add_argument('-k', default=1, type=int, choices=[1,2], help='shape of gamma distribution', metavar='Shape')
+parser.add_argument('-theta', default=450, type=int, help='die lifetime in minutes', metavar='Average die lifetime')
+parser.add_argument('-a', default=1.5, type=float, help='how much longer obverses last than reverses', metavar='Scale factor')
+parser.add_argument('-t', default=600, type=int, help='length of work period in minutes', metavar='Work period')
+parser.add_argument('-D', default=20, type=int, help='maximum number of obverse dies to be generated', metavar='D-max')
+parser.add_argument('-o_loss', default=0, type=float, help='percentage of obverse dies to delete from full chart', metavar='Obv loss')
+parser.add_argument('-r_loss', default=0, type=float, help='percentage of reverse dies to delete from full chart', metavar='Rev loss')
+parser.add_argument('-e_loss', default=0, type=float, help='percentage of edges to delete from full chart', metavar='Edge loss')
+parser.add_argument('-i', default=10000, type=int, help='iterations', metavar='i')
+parser.add_argument('--output', required=True, help='output file name')
+args = parser.parse_args()
+W = args.W
+odb = args.odb
+rdb = args.rdb
+k = args.k
+theta = args.theta
+a = args.a
+t = args.t
+D = args.D
+o_loss = args.o_loss
+r_loss = args.r_loss
+e_loss = args.e_loss
+i = args.i
+output_file = args.output
 
 assert odb >= W, 'Must have more obverse dies in die box than available workstations'
 assert rdb >= W, 'Must have more reverse dies in die box than available workstations'
+
+token = 'stop'
+while token == 'stop':
+    output_path = Path.cwd()/Path(output_file)
+    if output_path.exists():
+        print(f'Overwrite {output_file}? y/n')
+        q = input().upper()
+        if q == 'Y':
+            token = 'continue'
+        else:
+            print('Input output file name:')
+            output_file = input()
+    else:
+        token = 'continue'
+
+print('Starting program')
 
 def get_new_obv(obv):
     """Create a new reverse die."""
@@ -338,5 +368,5 @@ for j in range(0, i):
     sheet2['Q' + str(j + 2)] = analysis_output.planar
     sheet2['R' + str(j + 2)] = analysis_output.edge_count/(analysis_output.obv_count + analysis_output.rev_count)
 
-wb.save('output.xlsx')
+wb.save(f'{output_file}')
 print('End of Program')
