@@ -4,9 +4,11 @@ print('Starting program')
 
 import networkx as nx, numpy as np, random, openpyxl as xl
 from networkx.algorithms import bipartite
+from collections import namedtuple
 
 random.seed(0)
 np.random.seed(0)
+analysis_tuple = namedtuple('analysis_tuple', 'obv_count rev_count edge_count o_deg_min o_deg_mean o_deg_max r_deg_min r_deg_mean r_deg_max o_av_cluster r_av_cluster connect min_comp max_comp spl diam density planar')
 
 ### VARIABLES ###
 k = 1                    # Shape of gamma distribution (k=1 suggested by Esty 2011)
@@ -220,24 +222,28 @@ def analysis(G):
 
     planar = nx.check_planarity(G)[0]
 
-    return obv_count, \
-    rev_count, \
-    edge_count, \
-    o_deg_min, \
-    o_deg_mean, \
-    o_deg_max, \
-    r_deg_min, \
-    r_deg_mean, \
-    r_deg_max, \
-    o_av_cluster, \
-    r_av_cluster, \
-    connect, \
-    min_comp, \
-    max_comp, \
-    spl, \
-    diam, \
-    density, \
-    planar
+    analysis_output = analysis_tuple(
+    obv_count,
+     rev_count,
+      edge_count,
+       o_deg_min,
+        o_deg_mean,
+         o_deg_max,
+          r_deg_min,
+           r_deg_mean,
+            r_deg_max,
+             o_av_cluster,
+              r_av_cluster,
+               connect,
+                min_comp,
+                 max_comp,
+                  spl,
+                   diam,
+                    density,
+                     planar
+                     )
+
+    return analysis_output
 
 # Set up output Excel file
 wb = xl.Workbook()
@@ -312,42 +318,25 @@ for j in range(0, i):
     if o_loss != 0 or r_loss != 0 or e_loss != 0:
         G = disruption(G, o_loss, r_loss, e_loss)
     G.remove_nodes_from(list(nx.isolates(G)))
-    obv_count, \
-    rev_count, \
-    edge_count, \
-    o_deg_min, \
-    o_deg_mean, \
-    o_deg_max, \
-    r_deg_min, \
-    r_deg_mean, \
-    r_deg_max, \
-    o_av_cluster, \
-    r_av_cluster, \
-    connect, \
-    min_comp, \
-    max_comp, \
-    spl, \
-    diam, \
-    density, \
-    planar = analysis(G)
+    analysis_output = analysis(G)
     sheet2['A' + str(j + 2)] = j + 1
-    sheet2['B' + str(j + 2)] = rev_count/obv_count
-    sheet2['C' + str(j + 2)] = o_deg_min
-    sheet2['D' + str(j + 2)] = o_deg_mean
-    sheet2['E' + str(j + 2)] = o_deg_max
-    sheet2['F' + str(j + 2)] = r_deg_min
-    sheet2['G' + str(j + 2)] = r_deg_mean
-    sheet2['H' + str(j + 2)] = r_deg_max
-    sheet2['I' + str(j + 2)] = o_av_cluster
-    sheet2['J' + str(j + 2)] = r_av_cluster
-    sheet2['K' + str(j + 2)] = connect
-    sheet2['L' + str(j + 2)] = min_comp
-    sheet2['M' + str(j + 2)] = max_comp
-    sheet2['N' + str(j + 2)] = spl
-    sheet2['O' + str(j + 2)] = diam
-    sheet2['P' + str(j + 2)] = density
-    sheet2['Q' + str(j + 2)] = planar
-    sheet2['R' + str(j + 2)] = edge_count/(obv_count + rev_count)
+    sheet2['B' + str(j + 2)] = analysis_output.rev_count/analysis_output.obv_count
+    sheet2['C' + str(j + 2)] = analysis_output.o_deg_min
+    sheet2['D' + str(j + 2)] = analysis_output.o_deg_mean
+    sheet2['E' + str(j + 2)] = analysis_output.o_deg_max
+    sheet2['F' + str(j + 2)] = analysis_output.r_deg_min
+    sheet2['G' + str(j + 2)] = analysis_output.r_deg_mean
+    sheet2['H' + str(j + 2)] = analysis_output.r_deg_max
+    sheet2['I' + str(j + 2)] = analysis_output.o_av_cluster
+    sheet2['J' + str(j + 2)] = analysis_output.r_av_cluster
+    sheet2['K' + str(j + 2)] = analysis_output.connect
+    sheet2['L' + str(j + 2)] = analysis_output.min_comp
+    sheet2['M' + str(j + 2)] = analysis_output.max_comp
+    sheet2['N' + str(j + 2)] = analysis_output.spl
+    sheet2['O' + str(j + 2)] = analysis_output.diam
+    sheet2['P' + str(j + 2)] = analysis_output.density
+    sheet2['Q' + str(j + 2)] = analysis_output.planar
+    sheet2['R' + str(j + 2)] = analysis_output.edge_count/(analysis_output.obv_count + analysis_output.rev_count)
 
 wb.save('output.xlsx')
 print('End of Program')
