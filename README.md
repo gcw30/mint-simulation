@@ -52,3 +52,8 @@ Example command line with optional arguments:
 ```
 python3 mint_simulation.py 1 2 2 -a 3 -t 400 -D 10 --output file_name.xlsx
 ```
+<h2>Output</h2>
+The programme outputs an Excel spreadsheet with the chosen file name to the current working directory.
+
+<h2>License</h2>
+This code is licensed as GNU GPLv3.
